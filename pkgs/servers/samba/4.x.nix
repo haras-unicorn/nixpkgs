@@ -63,6 +63,7 @@
   libunwind,
   enablePam ? (!stdenv.hostPlatform.isDarwin),
   pam,
+  enableCTDB ? false,
 }:
 
 let
@@ -202,7 +203,7 @@ stdenv.mkDerivation (finalAttrs: {
     # Fix the XML Catalog Paths
     sed -i "s,\(XML_CATALOG_FILES=\"\),\1$XML_CATALOG_FILES ,g" buildtools/wafsamba/wafsamba.py
 
-    patchShebangs ./buildtools/bin
+    patchShebangs .
   ''
   + lib.optionalString stdenv.hostPlatform.isDarwin ''
     # The discard_const macro casts through uintptr_t, which newer clang
@@ -279,7 +280,8 @@ stdenv.mkDerivation (finalAttrs: {
     # Limit the job count down to the minimal on system with limited address
     # space.
     "--jobs 1"
-  ];
+  ]
+  ++ optional enableCTDB "--with-cluster-support";
 
   pythonPath = [
     python3Packages.dnspython
