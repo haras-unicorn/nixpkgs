@@ -62,6 +62,7 @@
   libunwind,
   enablePam ? (!stdenv.hostPlatform.isDarwin),
   pam,
+  enableCTDB ? false,
 }:
 
 let
@@ -191,7 +192,7 @@ stdenv.mkDerivation (finalAttrs: {
     # Fix the XML Catalog Paths
     sed -i "s,\(XML_CATALOG_FILES=\"\),\1$XML_CATALOG_FILES ,g" buildtools/wafsamba/wafsamba.py
 
-    patchShebangs ./buildtools/bin
+    patchShebangs .
   ''
   + lib.optionalString (stdenv.hostPlatform != stdenv.buildPlatform) ''
     substituteInPlace wscript source3/wscript nsswitch/wscript_build lib/replace/wscript source4/ntvfs/sysdep/wscript_configure --replace-fail 'sys.platform' '"${stdenv.hostPlatform.parsed.kernel.name}"'
@@ -253,7 +254,8 @@ stdenv.mkDerivation (finalAttrs: {
     # Limit the job count down to the minimal on system with limited address
     # space.
     "--jobs 1"
-  ];
+  ]
+  ++ optional enableCTDB "--with-cluster-support";
 
   # python-config from build Python gives incorrect values when cross-compiling.
   # If python-config is not found, the build falls back to using the sysconfig
