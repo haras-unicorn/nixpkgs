@@ -46,5 +46,6 @@ ceph-python.withPackages (
     # src/tools/cephfs/shell/setup.py
     cmd2
     colorama
+    distro
   ]
 )
